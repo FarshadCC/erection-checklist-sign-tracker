@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAN Erection Checklist</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <header class="app-header">
+        <div class="header-left">
+            <div class="header-icon">✓</div>
+            <div>
+                <h1>SPAN Erection Checklist</h1>
+                <p>RDLC Quality and Process Control</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span class="user-label">USER</span>
+                <span id="currentUser">Not signed in</span>
+                <button id="logoutBtn" class="header-logout" type="button">Log out</button>
+            </div>
+            <div class="system-status">
+                <span class="status-dot"></span>
+                <span>System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Folder Selection -->
+    <section class="folder-section main-page-section">
+        <div class="section-title">
+            <div>
+                <h2>Folder Connections</h2>
+                <p>Select the folders used by the checklist workflow.</p>
+            </div>
+        </div>
+
+        <div class="folder-cards">
+            <div class="folder-card">
+                <div class="folder-card-top">
+                    <div class="folder-icon">📁</div>
+                    <div class="folder-card-title">
+                        <h3>Draft</h3>
+                        <p>Source Folder</p>
+                    </div>
+                    <span id="draftStatus" class="folder-status disconnected">Not Connected</span>
+                </div>
+                <div class="folder-name" id="draftFolderName">Not selected</div>
+                <button id="selectDraftBtn" class="folder-button">Select Folder</button>
+            </div>
+
+            <div class="folder-card">
+                <div class="folder-card-top">
+                    <div class="folder-icon">📁</div>
+                    <div class="folder-card-title">
+                        <h3>Revision Required</h3>
+                        <p>Files requiring revision</p>
+                    </div>
+                    <span id="revisionStatus" class="folder-status disconnected">Not Connected</span>
+                </div>
+                <div class="folder-name" id="revisionFolderName">Not selected</div>
+                <button id="selectRevisionBtn" class="folder-button">Select Folder</button>
+            </div>
+
+            <div class="folder-card">
+                <div class="folder-card-top">
+                    <div class="folder-icon">📁</div>
+                    <div class="folder-card-title">
+                        <h3>Approved</h3>
+                        <p>Completed checklists</p>
+                    </div>
+                    <span id="approvedStatus" class="folder-status disconnected">Not Connected</span>
+                </div>
+                <div class="folder-name" id="approvedFolderName">Not selected</div>
+                <button id="selectApprovedBtn" class="folder-button">Select Folder</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist Toolbar -->
+    <section class="toolbar main-page-section">
+        <div class="checklist-toolbar">
+            <div class="toolbar-title">
+                <div>
+                    <h2>Checklist Files</h2>
+                    <p>Review and process erection checklists.</p>
+                </div>
+            </div>
+            <div class="toolbar-actions">
+                <div class="search-box">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" id="searchInput" placeholder="Search checklist...">
+                </div>
+                <select id="statusFilter" class="status-filter">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="revision">Revision Required</option>
+                </select>
+                <button id="refreshBtn" class="refresh-button">↻ Refresh List</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist Table -->
+    <section class="table-container main-page-section">
+        <table id="checklistTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>List</th>
+                    <th>Link</th>
+                    <th>APPROVE</th>
+                    <th>REVISION REQUIRED</th>
+                    <th>Inspector</th>
+                    <th>Comment</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="checklistBody"></tbody>
+        </table>
+    </section>
+
+    <!-- Process -->
+    <div class="process-section main-page-section">
+        <div class="process-header">
+            <div>
+                <h2>Process Checklist</h2>
+                <p>Move approved files and revision-required files to their destination folders.</p>
+            </div>
+            <button id="processBtn" class="process-button">✓ Process Checklist</button>
+        </div>
+
+        <div id="progressContainer" class="progress-container hidden">
+            <div class="progress-info">
+                <span id="progressText">Processing...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressBar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Navigation -->
+    <section class="management-nav main-page-section">
+        <div class="management-nav-header">
+            <div>
+                <h2>Management</h2>
+                <p>Shared inspector information and checklist processing history.</p>
+            </div>
+        </div>
+        <div class="management-nav-cards">
+            <button id="openInspectorsBtn" class="management-nav-card">
+                <span class="management-nav-icon">👤</span>
+                <span><strong>Inspector Management</strong><small>Manage shared inspectors</small></span>
+                <span class="management-nav-arrow">›</span>
+            </button>
+            <button id="openActivityBtn" class="management-nav-card">
+                <span class="management-nav-icon">📋</span>
+                <span><strong>Activity Log</strong><small>View shared processing history</small></span>
+                <span class="management-nav-arrow">›</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Management Page -->
+    <section id="managementPage" class="subpage hidden">
+        <div class="subpage-header">
+            <div>
+                <div class="subpage-kicker">MANAGEMENT</div>
+                <h2>Inspector Management &amp; Activity Log</h2>
+                <p>Shared information available to all users.</p>
+            </div>
+            <button id="backFromManagementBtn" class="secondary-button">← Back to Checklist</button>
+        </div>
+
+        <div id="inspectorsPanel" class="management-section">
+            <div class="management-header">
+                <div>
+                    <h2>Inspector Management</h2>
+                    <p>Save up to 10 inspectors for quick selection in the checklist.</p>
+                </div>
+                <button id="addInspectorBtn" class="primary-button">＋ Add Inspector</button>
+            </div>
+            <div id="inspectorLimitMessage" class="small-note hidden"></div>
+            <div id="inspectorList" class="inspector-list"></div>
+        </div>
+
+        <div id="activityPanel" class="management-section activity-section">
+            <div class="management-header">
+                <div>
+                    <h2>Activity Log</h2>
+                    <p>Shared processing history for all users.</p>
+                </div>
+                <div class="log-actions">
+                    <button id="exportLogBtn" class="secondary-button">⇩ Export CSV</button>
+                    <button id="clearLogBtn" class="danger-button">Clear Log</button>
+                </div>
+            </div>
+            <div class="log-summary"><span id="logCount">0 entries</span></div>
+            <div class="activity-table-container">
+                <table id="activityTable">
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th><th>User</th><th>File</th><th>Action</th><th>Inspector</th>
+                            <th>Email</th><th>Comment</th><th>Source</th><th>Destination</th><th>Inspector Folder</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityBody"></tbody>
+                </table>
+                <div id="emptyActivity" class="empty-state">No activity has been recorded yet.</div>
+            </div>
+        </div>
+    </section>
+
+    
+<!-- Full-screen in-app PDF viewer -->
+<section id="pdfViewer" class="pdf-viewer hidden" aria-label="PDF Preview">
+    <div class="pdf-viewer-shell">
+        <header class="pdf-viewer-header">
+            <div class="pdf-viewer-file">
+                <div class="pdf-viewer-file-icon">PDF</div>
+                <div class="pdf-viewer-file-info">
+                    <strong id="pdfViewerFileName">PDF Preview</strong>
+                    <span id="pdfViewerPageInfo">Loading document...</span>
+                </div>
+            </div>
+            <div class="pdf-viewer-actions">
+                <button id="pdfZoomOutBtn" class="viewer-tool-button" type="button" title="Zoom out">−</button>
+                <span id="pdfZoomLabel" class="pdf-zoom-label">100%</span>
+                <button id="pdfZoomInBtn" class="viewer-tool-button" type="button" title="Zoom in">+</button>
+                <button id="pdfPrevPageBtn" class="viewer-tool-button" type="button" title="Previous page">‹</button>
+                <button id="pdfNextPageBtn" class="viewer-tool-button" type="button" title="Next page">›</button>
+                <button id="pdfMySignatureBtn" class="viewer-action-button" type="button">My Signature</button>
+                <button id="pdfAddSignatureBtn" class="viewer-action-button signature-action" type="button">＋ Add Signature</button>
+                <button id="pdfAddDateBtn" class="viewer-action-button" type="button">＋ Add Date</button>
+                <button id="pdfSaveOriginalBtn" class="viewer-save-button" type="button">Save to Original</button>
+                <button id="pdfCloseBtn" class="viewer-close-button" type="button" aria-label="Close PDF viewer">×</button>
+            </div>
+        </header>
+        <div id="pdfViewerHint" class="pdf-viewer-hint hidden"></div>
+        <main id="pdfPagesContainer" class="pdf-pages-container">
+            <div class="pdf-viewer-loading">Loading PDF...</div>
+        </main>
+    </div>
+    <div id="pdfViewerToast" class="pdf-viewer-toast hidden" role="status"></div>
+
+    <div id="signatureSettingsModal" class="signature-settings-modal hidden">
+        <div class="signature-settings-backdrop" data-close-signature-settings></div>
+        <section class="signature-settings-card" role="dialog" aria-modal="true" aria-labelledby="signatureSettingsTitle">
+            <header class="signature-settings-header">
+                <div>
+                    <h2 id="signatureSettingsTitle">My Personal Signature</h2>
+                    <p>Your signature is saved privately in this browser for this login.</p>
+                </div>
+                <button id="closeSignatureSettingsBtn" class="modal-close" type="button" aria-label="Close">×</button>
+            </header>
+            <div class="signature-settings-body">
+                <div class="signature-method-tabs">
+                    <button type="button" class="signature-tab active" data-signature-tab="draw">Draw</button>
+                    <button type="button" class="signature-tab" data-signature-tab="text">Type name</button>
+                    <button type="button" class="signature-tab" data-signature-tab="upload">Upload</button>
+                </div>
+                <div class="signature-tab-panel" data-signature-panel="draw">
+                    <label>Draw your signature below</label>
+                    <canvas id="signatureDrawCanvas" width="900" height="260"></canvas>
+                    <div class="signature-panel-actions">
+                        <button id="clearSignatureCanvasBtn" class="secondary-button" type="button">Clear</button>
+                        <button id="saveDrawnSignatureBtn" class="primary-button" type="button">Save This Signature</button>
+                    </div>
+                </div>
+                <div class="signature-tab-panel hidden" data-signature-panel="text">
+                    <label for="typedSignatureName">Signature name</label>
+                    <input id="typedSignatureName" type="text" maxlength="100" placeholder="Your name">
+                    <div class="typed-signature-preview" id="typedSignaturePreview">Your Name</div>
+                    <button id="saveTypedSignatureBtn" class="primary-button" type="button">Save Typed Signature</button>
+                </div>
+                <div class="signature-tab-panel hidden" data-signature-panel="upload">
+                    <label for="signatureImageUpload">Choose a signature image (PNG or JPG)</label>
+                    <input id="signatureImageUpload" type="file" accept="image/png,image/jpeg">
+                    <p class="signature-help">The image is stored locally for your login. You only need to upload it once per browser.</p>
+                    <button id="saveUploadedSignatureBtn" class="primary-button" type="button" disabled>Save Uploaded Signature</button>
+                </div>
+                <div class="saved-signature-preview">
+                    <strong>Currently saved signature</strong>
+                    <div id="savedSignaturePreview" class="saved-signature-image">No signature saved yet</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</section>
+
+<!-- Message -->
+    <div id="messageBox" class="message hidden"></div>
+
+</div>
+
+<!-- Inspector Modal -->
+<div id="inspectorModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="inspectorModalTitle">
+        <div class="modal-header">
+            <div>
+                <h2 id="inspectorModalTitle">Add Inspector</h2>
+                <p>Inspector information is shared between all users.</p>
+            </div>
+            <button id="closeInspectorModalBtn" class="modal-close" aria-label="Close">×</button>
+        </div>
+
+        <form id="inspectorForm">
+            <input type="hidden" id="inspectorEditId">
+
+            <label for="inspectorName">Name <span>*</span></label>
+            <input type="text" id="inspectorName" maxlength="100" placeholder="Inspector name" required>
+
+            <label for="inspectorEmail">Email</label>
+            <input type="email" id="inspectorEmail" maxlength="150" placeholder="inspector@example.com">
+
+            <label for="inspectorFolderAddress">Folder Address</label>
+            <input type="text" id="inspectorFolderAddress" maxlength="500" placeholder="Enter folder address or description">
+
+            <div class="folder-picker-row">
+                <button type="button" id="selectInspectorFolderBtn" class="secondary-button">📁 Select Folder</button>
+                <span id="inspectorSelectedFolder" class="selected-folder-label">No folder selected</span>
+            </div>
+            <p class="field-help">The browser can save a folder handle, but it cannot expose the full Windows path (for example C:\...). Use the Folder Address field if you want to keep the actual path as text.</p>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelInspectorBtn" class="secondary-button">Cancel</button>
+                <button type="submit" class="primary-button">Save Inspector</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="script.js"></script>
+
+<!-- Login -->
+<div id="loginOverlay" class="login-overlay hidden">
+    <div class="login-card">
+        <div class="login-brand">SPAN</div>
+        <h2>Sign in</h2>
+        <p>Enter your assigned username and password.</p>
+        <form id="loginForm">
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" type="text" autocomplete="username" required>
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" required>
+            <div id="loginError" class="login-error hidden"></div>
+            <button type="submit" class="primary-button login-button">Sign in</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
